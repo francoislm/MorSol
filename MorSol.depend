@@ -1,0 +1,22 @@
+# depslib dependency file v1.0
+1434527795 source:z:\privé\dev\morsol\main.cpp
+	<iostream>
+	<Grid.h>
+	<stdlib.h>
+	<unistd.h>
+
+1434533031 source:z:\privé\dev\morsol\src\grid.cpp
+	<iostream>
+	<fstream>
+	<sstream>
+	<map>
+	"Grid.h"
+
+1434554985 z:\privé\dev\morsol\include\grid.h
+	<map>
+
+1433154074 source:z:\privé\dev\morsol\src\test.cpp
+	"test.h"
+
+1433154073 z:\privé\dev\morsol\include\test.h
+

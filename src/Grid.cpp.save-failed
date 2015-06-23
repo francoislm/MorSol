@@ -1,0 +1,128 @@
+#include <iostream>
+#include <fstream>
+#include <sstream>
+#include "Grid.h"
+
+using namespace std;
+
+Grid::Grid()
+{
+    for(unsigned x=0; x<MAX_GRID; x++)
+        for (unsigned y=0; y<MAX_GRID; y++)
+            Cells[x][y]='.';
+    Min_X=27; Max_X=36;
+    Min_Y=27; Max_Y=36;
+
+    #define SIZEY_GRID_INIT 10
+    string Grid_init[SIZEY_GRID_INIT] = {
+        "...XXXX...",
+        "...X..X...",
+        "...X..X...",
+        "XXXX..XXXX",
+        "X........X",
+        "X........X",
+        "XXXX..XXXX",
+        "...X..X...",
+        "...X..X...",
+        "...XXXX..."};
+    for(int j=0; j<SIZEY_GRID_INIT; j++)
+    {
+        int l=Grid_init[j].size();
+        for(int i=0; i<l; i++)
+        {
+            Cells[Min_X+i][Min_Y+j]=Grid_init[j].at(i);
+        }
+    }
+}
+
+/*
+Grid::Grid(const string Filename)
+{
+  cout << Filename << endl;
+//    Min_X=27; Max_X=36;
+//    Min_Y=27; Max_Y=36;
+
+    for(unsigned x=0; x<MAX_GRID; x++)
+        for (unsigned y=0; y<MAX_GRID; y++)
+            Cells[x][y]='.';
+    Min_X=0; Max_X=0;
+    Min_Y=0; Max_Y=0;
+}*/
+
+Grid::~Grid()
+{
+    //dtor
+}
+
+void Grid::Print()
+{
+    cout << "Origine=(" << Min_X << "," << Min_Y << ")" << endl;
+    for(unsigned x=Min_X; x<=Max_X; x++)
+    {
+        for (unsigned y=Min_Y; y<=Max_Y; y++)
+            cout << Cells[x][y];
+        cout <<  endl;
+    }
+}
+/*
+unsigned char Grid::Cell(unsigned x, unsigned y)
+{
+    return this->Cells[x + Origin_X][y + Origin_Y];
+}*/
+
+inline unsigned char Grid::operator() (const unsigned x, const unsigned y) const
+{
+  return Cells[x][y];
+}
+
+inline unsigned char& Grid::operator() (const unsigned x, const unsigned y)
+{
+  return Cells[x][y];
+}
+
+bool Grid::ImportPoints(const string Filename)
+{
+  stringstream ss;
+  int NumLigne=0;
+  int x,y, O_x, O_y;
+  char c_contents[2];
+  string ligne;
+  string direction;
+
+  ifstream fichier(Filename);
+  if (fichier.fail()) {
+    cerr << "Fichier introuvable. " << Filename << endl;
+    return false;
+  }
+
+  if (!getline(fichier,ligne))
+  {
+    cerr << "Fichier vide ! " << Filename << endl;
+  }
+  if (sscanf(ligne.c_str(),"ORIGIN=%i,%i", &O_x, &O_y)!=2)
+  {
+    cerr << "'ORIGIN=' attendu " << endl;
+    return false;
+  }
+  cout << ligne << " : " << O_x << "," << O_y << endl;
+
+  while (getline(fichier,ligne))
+  {
+    NumLigne++;
+    if (sscanf(ligne.c_str(),"%i,%i,%2s", &x, &y, c_contents)!=3)
+    {
+      cerr << "Format incorrect ligne " << NumLigne << endl;
+      return false;
+    }
+    direction=(string)c_contents;
+    cout << ligne << " : " << x+O_x << "," << y+O_y << direction << endl;
+  }
+
+  fichier.close();
+  return true;
+}
+
+bool Grid::AddPointInLine(int x, int y, )
+{
+
+}
