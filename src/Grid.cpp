@@ -28,8 +28,10 @@ Grid::Grid()
   for(int x=0; x<MAX_GRID; x++)
       for (int y=0; y<MAX_GRID; y++)
           Cells[x][y]=EMPTY_CELL;
-  Min_X=27; Max_X=36;
-  Min_Y=27; Max_Y=36;
+//  Min_X=27; Max_X=36;
+//  Min_Y=27; Max_Y=36;
+  Min_X=Max_X=27;
+  Min_Y=Max_Y=27;
 
   #define SIZEY_GRID_INIT 10
   string Grid_init[SIZEY_GRID_INIT] = {
@@ -49,10 +51,12 @@ Grid::Grid()
       int l=Grid_init[j].size();
       for(int i=0; i<l; i++)
       {
-        if (isspace(Grid_init[j].at(i)))
-          Cells[Min_X+i][Min_Y+j]=EMPTY_CELL;
-        else
-          Cells[Min_X+i][Min_Y+j]=INIT_CELL;
+        if (!isspace(Grid_init[j].at(i)))
+          AddPoint(Min_X+i, Min_Y+j,INIT_CELL);
+//        if (isspace(Grid_init[j].at(i)))
+//          Cells[Min_X+i][Min_Y+j]=EMPTY_CELL;
+//        else
+          //Cells[Min_X+i][Min_Y+j]=INIT_CELL;
       }
   }
 }
@@ -185,7 +189,7 @@ bool Grid::AddPointInLine(int x0, int y0, const string &sDir)
   return AddPoint(x0, y0);
 }
 
-bool Grid::AddPoint(int x, int y)
+bool Grid::AddPoint(int x, int y, unsigned char TypeCell)
 {
   if (x<1 || y <1 || x>(MAX_GRID-1) || y>(MAX_GRID-1))
   {
@@ -193,7 +197,7 @@ bool Grid::AddPoint(int x, int y)
     return false;
   }
   //cout << "Ajout de " << x << "," << y << endl;
-  Cells[x][y]=FILLED_CELL;
+  Cells[x][y]=TypeCell;
 
 // augmentation des bornes d'encadrement ?
   if (x<Min_X) Min_X=x;

@@ -7,6 +7,8 @@
 #define INIT_CELL 'O'
 #define FILLED_CELL 'X'
 
+#define NB_DIRECTIONS 8
+
 #define Cell_0_1(c) ((c==EMPTY_CELL)?0:1)
 
 
@@ -14,9 +16,9 @@ class Grid
 {
     struct Point
     {
-      int x,y;
+      short int x,y;
       Point (){x=0;y=0;};
-      Point (int _x, int _y) {x=_x; y=_y;}
+      Point (short int _x, short int _y) {x=_x; y=_y;}
     };
     typedef Point Direction;
 
@@ -29,14 +31,15 @@ class Grid
         void Stats();
         bool ImportPoints(const std::string &Filename);
         bool AddPointInLine(int x, int y, const std::string &direction);
-        bool AddPoint(int x, int y);
+        bool AddPoint(int x, int y, unsigned char TypeCell=FILLED_CELL);
         bool RemovePoint(int x, int y);
         std::map <std::string, Direction> DirDecode;
 
     protected:
     private:
         unsigned char Cells[MAX_GRID][MAX_GRID];
-        int Min_X, Max_X, Min_Y, Max_Y;
+        short int NbVoisins[MAX_GRID][MAX_GRID][NB_DIRECTIONS];
+        short int Min_X, Max_X, Min_Y, Max_Y;
         inline int Cell_0or1 (unsigned char);
 };
 
