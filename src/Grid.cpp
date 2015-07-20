@@ -8,19 +8,30 @@ using namespace std;
 
 
 Grid::Grid()
-{
-  DirDecode={
+  :Direction_Decode_Str{
     {"N",Direction(0,-1)},
-    {"S",Direction(0,1)},
-    {"E",Direction(1,0)},
-    {"W",Direction(-1,0)},
     {"NE",Direction(1,-1)},
-    {"NW",Direction(-1,-1)},
+    {"E",Direction(1,0)},
     {"SE",Direction(1,1)},
-    {"SW",Direction(-1,1)}
-  };
-
-//  for ( auto dir_entry : DirDecode )
+    {"S",Direction(0,1)},
+    {"SW",Direction(-1,1)},
+    {"W",Direction(-1,0)},
+    {"NW",Direction(-1,-1)}
+  },
+  Direction_Decode_Int{
+    Direction(0,-1),
+    Direction(1,-1),
+    Direction(1,0),
+    Direction(1,1),
+    Direction(0,1),
+    Direction(-1,1),
+    Direction(-1,0),
+    Direction(-1,-1)
+  },
+  NbVoisins{{{0}}}
+{
+//
+//  for ( auto dir_entry : Direction_Decode_Str )
 //  {
 //              cout  << dir_entry.first << "=<" << dir_entry.second.x << "," << dir_entry.second.y << ">" << endl;
 //  }
@@ -53,10 +64,6 @@ Grid::Grid()
       {
         if (!isspace(Grid_init[j].at(i)))
           AddPoint(Min_X+i, Min_Y+j,INIT_CELL);
-//        if (isspace(Grid_init[j].at(i)))
-//          Cells[Min_X+i][Min_Y+j]=EMPTY_CELL;
-//        else
-          //Cells[Min_X+i][Min_Y+j]=INIT_CELL;
       }
   }
 }
@@ -75,6 +82,8 @@ void Grid::Print()
           cout << Cells[x][y];
       cout <<  endl;
   }
+#define XXX 34
+for (int y=Min_Y-1; y<=Max_Y+1; y++) {for (int dd=0; dd<NB_DIRECTIONS; dd++) printf("(%d,%d)<%d> = %d\n", XXX, y, dd, NbVoisins[XXX][y][dd]); printf("\n");}
 }
 
 void Grid::Stats()
@@ -104,7 +113,7 @@ void Grid::Stats()
   cout << endl << "Stats :" << endl;
   for(n=0; n<=7; n++)
   {
-    cout << n << " -> " << nb_voisins[n] << " voisins" << endl;
+    cout << n << " voisins : " << nb_voisins[n] << endl;
   }
 }
 
@@ -166,7 +175,7 @@ bool Grid::ImportPoints(const string &Filename)
 
 bool Grid::AddPointInLine(int x0, int y0, const string &sDir)
 {
-  Direction dir=DirDecode[sDir];
+  Direction dir=Direction_Decode_Str[sDir];
   int nb_vides=0;
   int x=x0, y=y0;
 
@@ -189,17 +198,52 @@ bool Grid::AddPointInLine(int x0, int y0, const string &sDir)
   return AddPoint(x0, y0);
 }
 
-bool Grid::AddPoint(int x, int y, unsigned char TypeCell)
+inline bool Grid::OutOfBounds(int x, int y)
 {
   if (x<1 || y <1 || x>(MAX_GRID-1) || y>(MAX_GRID-1))
   {
     cerr << x << "," << y << " hors bornes." << endl;
+    return true;
+  }
+  return false;
+}
+
+bool Grid::AddPoint(int x, int y, unsigned char TypeCell)
+{
+  if (OutOfBounds(x, y)) return false;
+
+  if (Cells[x][y]!=EMPTY_CELL)
+  {
+    cerr << x << "," << y << " non vide, ajout Point impossible." << endl;
     return false;
   }
-  //cout << "Ajout de " << x << "," << y << endl;
+
+  if (TypeCell==EMPTY_CELL)
+  {
+    cerr << "Ajout vide impossible." << endl;
+    return false;
+  }
+
+// Ajout du Point
   Cells[x][y]=TypeCell;
 
-// augmentation des bornes d'encadrement ?
+// completer NbVoisins pour les voisins
+  int d_x, d_y, n, xx, yy;
+  for (int d = 0, r_d = NB_DIRECTIONS / 2; d < NB_DIRECTIONS; d++, r_d = (r_d + 1) % NB_DIRECTIONS)
+  { // r_d = direction opposée
+    n = NbVoisins[x][y][r_d] + 1; // nb voisins à ajouter dans la direction d
+    xx = x, yy = y;
+    d_x = Direction_Decode_Int[d].x;
+    d_y = Direction_Decode_Int[d].y;
+    for (int i=NbVoisins[x][y][d] + 1; i>0; i--)
+    {
+      xx += d_x;
+      yy += d_y;
+      NbVoisins[xx][yy][r_d] += n;
+    }
+  }
+
+// Augmentation des bornes d'encadrement ?
   if (x<Min_X) Min_X=x;
   if (x>Max_X) Max_X=x;
   if (y<Min_Y) Min_Y=y;
@@ -209,21 +253,34 @@ bool Grid::AddPoint(int x, int y, unsigned char TypeCell)
 
 bool Grid::RemovePoint(int x, int y)
 {
-  if (x<1 || y <1 || x>(MAX_GRID-1) || y>(MAX_GRID-1))
-  {
-    cerr << x << "," << y << " hors bornes." << endl;
-    return false;
-  }
+  if (OutOfBounds(x, y)) return false;
+
   if (Cells[x][y]!=FILLED_CELL)
   {
     cerr << "(" << x << "," << y << ")=" << Cells[x][y] << " n'est supprimable." << endl;
     return false;
   }
   cout << "Suppression de " << x << "," << y << endl;
+// Suppression du Point
   Cells[x][y]=EMPTY_CELL;
 
-// reduction des bornes d'encadrement ?
-  int n;
+// completer NbVoisins pour les voisins
+  int d_x, d_y, n, xx, yy;
+  for (int d = 0, r_d = NB_DIRECTIONS / 2; d < NB_DIRECTIONS; d++, r_d = (r_d + 1) % NB_DIRECTIONS)
+  { // r_d = direction opposée
+    n = NbVoisins[x][y][r_d] + 1; // nb voisins à supprimer dans la direction d
+    xx = x, yy = y;
+    d_x = Direction_Decode_Int[d].x;
+    d_y = Direction_Decode_Int[d].y;
+    for (int i=NbVoisins[x][y][d] + 1; i>0; i--)
+    {
+      xx += d_x;
+      yy += d_y;
+      NbVoisins[xx][yy][r_d] -= n;
+    }
+  }
+
+// Réduction des bornes d'encadrement ?
   bool reduced;
   if (x==Min_X)
   {
@@ -276,3 +333,5 @@ bool Grid::RemovePoint(int x, int y)
 
   return true;
 }
+
+

@@ -1,6 +1,7 @@
 #ifndef GRID_H
 #define GRID_H
 #include <map>
+#include<vector>
 
 #define MAX_GRID 64
 #define EMPTY_CELL '.'
@@ -33,14 +34,17 @@ class Grid
         bool AddPointInLine(int x, int y, const std::string &direction);
         bool AddPoint(int x, int y, unsigned char TypeCell=FILLED_CELL);
         bool RemovePoint(int x, int y);
-        std::map <std::string, Direction> DirDecode;
+        inline bool OutOfBounds(int x, int y);
+//        void NeighboursCount();
+        std::map <std::string, Direction> Direction_Decode_Str;
+        Direction Direction_Decode_Int[NB_DIRECTIONS];
 
     protected:
     private:
         unsigned char Cells[MAX_GRID][MAX_GRID];
         short int NbVoisins[MAX_GRID][MAX_GRID][NB_DIRECTIONS];
         short int Min_X, Max_X, Min_Y, Max_Y;
-        inline int Cell_0or1 (unsigned char);
+        //inline int Cell_0or1 (unsigned char);
 };
 
 #endif // GRID_H

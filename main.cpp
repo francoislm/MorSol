@@ -62,6 +62,8 @@ int main(int argc, char *argv[])
 
   cout << endl;
   myGrid.Print();
+  myGrid.RemovePoint(34,34);
+  myGrid.Print();
   myGrid.Stats();
 
   // to wait
