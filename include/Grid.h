@@ -15,12 +15,12 @@
 
 class Grid
 {
-    struct Point
+    typedef struct Point
     {
       short int x,y;
       Point (){x=0;y=0;};
       Point (short int _x, short int _y) {x=_x; y=_y;}
-    };
+    }Point;
     typedef Point Direction;
 
     public:
@@ -34,6 +34,7 @@ class Grid
         bool AddPointInLine(int x, int y, const std::string &direction);
         bool AddPoint(int x, int y, unsigned char TypeCell=FILLED_CELL);
         bool RemovePoint(int x, int y);
+        Point* ChercherPointCandidatSuppression();
         inline bool OutOfBounds(int x, int y);
 //        void NeighboursCount();
         std::map <std::string, Direction> Direction_Decode_Str;

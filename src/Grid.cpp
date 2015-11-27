@@ -6,7 +6,9 @@
 
 using namespace std;
 
-
+//
+//  Grid
+//
 Grid::Grid()
   :Direction_Decode_Str{
     {"N",Direction(0,-1)},
@@ -30,11 +32,6 @@ Grid::Grid()
   },
   NbVoisins{{{0}}}
 {
-//
-//  for ( auto dir_entry : Direction_Decode_Str )
-//  {
-//              cout  << dir_entry.first << "=<" << dir_entry.second.x << "," << dir_entry.second.y << ">" << endl;
-//  }
 
   for(int x=0; x<MAX_GRID; x++)
       for (int y=0; y<MAX_GRID; y++)
@@ -68,11 +65,17 @@ Grid::Grid()
   }
 }
 
+//
+//  ~Grid
+//
 Grid::~Grid()
 {
     //dtor
 }
 
+//
+// Print
+//
 void Grid::Print()
 {
   //cout << "Origine=(" << Min_X << "," << Min_Y << ")" << endl;
@@ -83,12 +86,15 @@ void Grid::Print()
       cout <<  endl;
   }
 #define XXX 34
-for (int y=Min_Y-1; y<=Max_Y+1; y++) {for (int dd=0; dd<NB_DIRECTIONS; dd++) printf("(%d,%d)<%d> = %d\n", XXX, y, dd, NbVoisins[XXX][y][dd]); printf("\n");}
+//for (int y=Min_Y-1; y<=Max_Y+1; y++) {for (int dd=0; dd<NB_DIRECTIONS; dd++) printf("(%d,%d)<%d> = %d\n", XXX, y, dd, NbVoisins[XXX][y][dd]); printf("\n");}
 }
 
+//
+//  Stats
+//
 void Grid::Stats()
 {
-  int nb_voisins[8]={0};
+  int nb_voisins[9]={0};
   int n;
 
   for (int y=Min_Y; y<=Max_Y; y++)
@@ -106,12 +112,13 @@ void Grid::Stats()
           + Cell_0_1(Cells[x+1][y])
           + Cell_0_1(Cells[x+1][y+1]);
         nb_voisins[n]++;
-//        cout << x << "," << y << " : " << n << " " << nb_voisins[n] << endl;
+//if (x==31)
+//  cout << x << "," << y << " : " << n << " " << nb_voisins[n] << endl;
       }
     }
   }
   cout << endl << "Stats :" << endl;
-  for(n=0; n<=7; n++)
+  for(n=0; n<=8; n++)
   {
     cout << n << " voisins : " << nb_voisins[n] << endl;
   }
@@ -127,6 +134,9 @@ void Grid::Stats()
 //  return Cells[x][y];
 //}
 
+//
+//  ImportPoints
+//
 bool Grid::ImportPoints(const string &Filename)
 {
   stringstream ss;
@@ -173,6 +183,9 @@ bool Grid::ImportPoints(const string &Filename)
   return true;
 }
 
+//
+//  AddPointInLine
+//
 bool Grid::AddPointInLine(int x0, int y0, const string &sDir)
 {
   Direction dir=Direction_Decode_Str[sDir];
@@ -192,12 +205,15 @@ bool Grid::AddPointInLine(int x0, int y0, const string &sDir)
   }
   if (nb_vides !=1)
   {
-    cerr << nb_vides << " vides. Ligne non compl�t�e." << endl;
+    cerr << nb_vides << " vides. Ligne non complétée." << endl;
     return false;
   }
   return AddPoint(x0, y0);
 }
 
+//
+//  OutOfBounds
+//
 inline bool Grid::OutOfBounds(int x, int y)
 {
   if (x<1 || y <1 || x>(MAX_GRID-1) || y>(MAX_GRID-1))
@@ -208,6 +224,9 @@ inline bool Grid::OutOfBounds(int x, int y)
   return false;
 }
 
+//
+//  AddPoint
+//
 bool Grid::AddPoint(int x, int y, unsigned char TypeCell)
 {
   if (OutOfBounds(x, y)) return false;
@@ -229,17 +248,17 @@ bool Grid::AddPoint(int x, int y, unsigned char TypeCell)
 
 // completer NbVoisins pour les voisins
   int d_x, d_y, n, xx, yy;
-  for (int d = 0, r_d = NB_DIRECTIONS / 2; d < NB_DIRECTIONS; d++, r_d = (r_d + 1) % NB_DIRECTIONS)
-  { // r_d = direction oppos�e
-    n = NbVoisins[x][y][r_d] + 1; // nb voisins � ajouter dans la direction d
+  for (int dir = 0, r_dir = NB_DIRECTIONS / 2; dir < NB_DIRECTIONS; dir++, r_dir = (r_dir + 1) % NB_DIRECTIONS)
+  { // r_dir = direction opposée à dir
+    n = NbVoisins[x][y][r_dir] + 1; // nb voisins à ajouter dans la direction d = nombre de voisins ....
     xx = x, yy = y;
-    d_x = Direction_Decode_Int[d].x;
-    d_y = Direction_Decode_Int[d].y;
-    for (int i=NbVoisins[x][y][d] + 1; i>0; i--)
+    d_x = Direction_Decode_Int[dir].x;
+    d_y = Direction_Decode_Int[dir].y;
+    for (int i=NbVoisins[x][y][dir] + 1; i>0; i--)
     {
       xx += d_x;
       yy += d_y;
-      NbVoisins[xx][yy][r_d] += n;
+      NbVoisins[xx][yy][r_dir] += n;
     }
   }
 
@@ -251,6 +270,9 @@ bool Grid::AddPoint(int x, int y, unsigned char TypeCell)
   return true;
 }
 
+//
+//  RemovePoint
+//
 bool Grid::RemovePoint(int x, int y)
 {
   if (OutOfBounds(x, y)) return false;
@@ -264,23 +286,23 @@ bool Grid::RemovePoint(int x, int y)
 // Suppression du Point
   Cells[x][y]=EMPTY_CELL;
 
-// completer NbVoisins pour les voisins
+// compléter NbVoisins pour les voisins
   int d_x, d_y, n, xx, yy;
-  for (int d = 0, r_d = NB_DIRECTIONS / 2; d < NB_DIRECTIONS; d++, r_d = (r_d + 1) % NB_DIRECTIONS)
-  { // r_d = direction oppos�e
-    n = NbVoisins[x][y][r_d] + 1; // nb voisins � supprimer dans la direction d
+  for (int dir = 0, r_dir = NB_DIRECTIONS / 2; dir < NB_DIRECTIONS; dir++, r_dir = (r_dir + 1) % NB_DIRECTIONS)
+  { // r_dir = direction opposée à dir
+    n = NbVoisins[x][y][r_dir] + 1; // nb voisins à supprimer dans la direction d
     xx = x, yy = y;
-    d_x = Direction_Decode_Int[d].x;
-    d_y = Direction_Decode_Int[d].y;
-    for (int i=NbVoisins[x][y][d] + 1; i>0; i--)
+    d_x = Direction_Decode_Int[dir].x;
+    d_y = Direction_Decode_Int[dir].y;
+    for (int i=NbVoisins[x][y][dir] + 1; i>0; i--)
     {
       xx += d_x;
       yy += d_y;
-      NbVoisins[xx][yy][r_d] -= n;
+      NbVoisins[xx][yy][r_dir] -= n;
     }
   }
 
-// R�duction des bornes d'encadrement ?
+// Réduction des bornes d'encadrement ?
   bool reduced;
   if (x==Min_X)
   {
@@ -332,6 +354,44 @@ bool Grid::RemovePoint(int x, int y)
   }
 
   return true;
+}
+
+
+//
+//  ChercherPointCandidatRéduction
+//
+Grid::Point* Grid::ChercherPointCandidatSuppression()
+{
+  bool UneSeuleDirAvecPlus5Points;
+
+  // parcours de la grille réduite
+  for (int y=Min_Y; y<=Max_Y; y++)
+  {
+    for(int x=Min_X; x<=Max_X; x++)
+    {
+      if (Cells[x][y]==FILLED_CELL)
+      {
+        UneSeuleDirAvecPlus5Points=false;
+        // examen des voisins
+        for (int dir = 0, r_dir = NB_DIRECTIONS / 2; r_dir < NB_DIRECTIONS; dir++, r_dir++)
+        { // r_dir = direction opposée à dir
+           if ((NbVoisins[x][y][dir] + NbVoisins[x][y][r_dir]) >= 4)
+           { // on est sur une ligne de 5 ou plus
+              if (UneSeuleDirAvecPlus5Points)
+              { // déjà une direction vérifie la condition donc c'est plus valide
+                UneSeuleDirAvecPlus5Points=false;
+                break;
+              }
+              else
+                UneSeuleDirAvecPlus5Points = true;
+           }
+        }
+        if (UneSeuleDirAvecPlus5Points)
+          return new Point(x, y); // on a trouvé un candidat à la suppression
+      }
+    }
+  }
+  return nullptr; // aucun candidat
 }
 
 
